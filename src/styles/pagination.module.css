@@ -1,0 +1,9 @@
+.control {
+  border: none;
+}
+
+.control[data-active] {
+  background: transparent;
+  border: 1px solid var(--mantine-color-blue-filled);
+  color: var(--mantine-color-blue-filled);
+}
