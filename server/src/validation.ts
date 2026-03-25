@@ -60,7 +60,7 @@ export const ItemsGetInQuerySchema = z.object({
       return val === 'true' || val === '1';
     })
     .pipe(z.boolean().optional().default(false)),
-  sortColumn: z.enum<ItemSortColumn[]>(['title', 'createdAt']).optional(),
+  sortColumn: z.enum<ItemSortColumn[]>(['title', 'createdAt', 'price']).optional(), // добавил `price` в сортируемые колонки
   sortDirection: z.enum<SortDirection[]>(['asc', 'desc']).optional(),
 });
 

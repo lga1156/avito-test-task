@@ -15,17 +15,14 @@ const fastify = Fastify({
 await fastify.register((await import('@fastify/middie')).default);
 
 // Искуственная задержка ответов, чтобы можно было протестировать состояния загрузки
-fastify.use((_, __, next) =>
-  new Promise((res) => setTimeout(res, 300 + Math.random() * 700)).then(next),
-);
+fastify.use((_, __, next) => new Promise((res) => setTimeout(res, 300 + Math.random() * 700)).then(next));
 
-// Настройка CORS (ну это я хз, мб колхоз какой-то)
+// Настройка CORS для корректной работы GET-запросов из браузера
 fastify.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Если это "разведывательный" запрос от браузера — сразу отвечаем "ОК" (200)
   if (req.method === 'OPTIONS') {
     res.statusCode = 200;
     res.end();
@@ -73,8 +70,9 @@ interface ItemsGetRequest extends Fastify.RequestGenericInterface {
 }
 
 fastify.get<ItemsGetRequest>('/items', (request) => {
-  const { q, limit, skip, needsRevision, categories, sortColumn, sortDirection } =
-    ItemsGetInQuerySchema.parse(request.query);
+  const { q, limit, skip, needsRevision, categories, sortColumn, sortDirection } = ItemsGetInQuerySchema.parse(
+    request.query,
+  );
 
   const filteredItems = ITEMS.filter((item) => {
     return (
@@ -94,15 +92,16 @@ fastify.get<ItemsGetRequest>('/items', (request) => {
         if (sortColumn === 'title') {
           comparisonValue = item1.title.localeCompare(item2.title);
         } else if (sortColumn === 'createdAt') {
-          comparisonValue =
-            new Date(item1.createdAt).valueOf() - new Date(item2.createdAt).valueOf();
+          comparisonValue = new Date(item1.createdAt).valueOf() - new Date(item2.createdAt).valueOf();
+        } else if (sortColumn === 'price') {
+          comparisonValue = item1.price - item2.price;
         }
 
         return (sortDirection === 'desc' ? -1 : 1) * comparisonValue;
       })
       .slice(skip, skip + limit)
       .map((item) => ({
-        id: item.id, // изначально его не было, на фронте приходили items все с unknown
+        id: item.id, // указал, так как идентификаторы с items.json приходили с `unknown`
         category: item.category,
         title: item.title,
         price: item.price,
@@ -160,8 +159,8 @@ fastify.put<ItemUpdateRequest>('/items/:id', (request, reply) => {
 const port = Number(process.env.port) || 8080;
 // поменял на `||` чтобы через `npm start` запускался по умолчанию на 8080 порту
 
-fastify.listen({ port }, function (err) {
-  // убрал _address из-за линтера
+fastify.listen({ port, host: '0.0.0.0' }, function (err) {
+  // убрал `_address`, так как линтер ругался на неиспользуемую переменную
   if (err) {
     fastify.log.error(err);
     process.exit(1);

@@ -1,4 +1,3 @@
-// src/types.ts
 export type AdCategory = 'auto' | 'real_estate' | 'electronics';
 
 export type AutoItemParams = {

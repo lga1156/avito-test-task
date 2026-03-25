@@ -4,11 +4,18 @@ import App from './App.tsx';
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import { MantineProvider } from '@mantine/core';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import '@mantine/notifications/styles.css';
 import { Notifications } from '@mantine/notifications';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Отключаем рефетч при возврате на вкладку
+      retry: 1, // Если запрос упал, попробуем еще 1 раз
+      staleTime: 5 * 60 * 1000, // Данные считаются свежими 5 минут
+    },
+  },
+});
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

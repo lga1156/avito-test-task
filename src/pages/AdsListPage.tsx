@@ -1,77 +1,38 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import {
-  Card,
-  Image,
-  Text,
-  Badge,
-  Group,
-  SimpleGrid,
-  Loader,
-  Center,
-  Alert,
-  TextInput,
-  Select,
-  Pagination,
-  Grid,
-  Checkbox,
-  Switch,
-  Title,
-  Stack,
-  Divider,
-  Box,
-  Accordion,
-  Paper,
-  Button,
-  Container,
-} from '@mantine/core';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { Text, Group, SimpleGrid, Center, Pagination, Grid, Title, Stack, Box, Container } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { IconSearch } from '@tabler/icons-react';
 import { fetchAds } from '../api/requests';
-import { formatPrice } from '../utils/formatters';
-import { categoryLabels } from '../constants/adLabels';
+import { useAdsFilterStore } from '../store/adsFilterStore';
 import classes from '../styles/pagination.module.css';
+import { PAGE_SIZE, SORT_MAP } from '../constants/adsListOptions';
+import { useShallow } from 'zustand/react/shallow';
 
-const SORT_OPTIONS = [
-  { value: 'newest', label: 'По новизне (сначала новые)' },
-  { value: 'oldest', label: 'Сначала старые' },
-  { value: 'title_asc', label: 'По названию (А-Я)' },
-  { value: 'title_desc', label: 'По названию (Я-А)' },
-];
-
-const SORT_MAP: Record<string, { sortColumn: string; sortDirection: string }> = {
-  newest: { sortColumn: 'createdAt', sortDirection: 'desc' },
-  oldest: { sortColumn: 'createdAt', sortDirection: 'asc' },
-  title_asc: { sortColumn: 'title', sortDirection: 'asc' },
-  title_desc: { sortColumn: 'title', sortDirection: 'desc' },
-};
-
-const PAGE_SIZE = 10;
+import { AdsSearchToolbar } from '../components/AdsSearchToolbar';
+import { AdsSidebar } from '../components/AdsSidebar';
+import { AdGridCard } from '../components/AdGridCard';
+import { AdListCard } from '../components/AdListCard';
+import { PageLoader } from '../components/ui/PageLoader';
+import { PageError } from '../components/ui/PageError';
 
 export const AdsListPage = () => {
-  const navigate = useNavigate();
+  const { page, searchInput, selectedCategories, needsRevision, sortValue, viewMode, setPage } = useAdsFilterStore(
+    useShallow((state) => ({
+      page: state.page,
+      searchInput: state.searchInput,
+      selectedCategories: state.selectedCategories,
+      needsRevision: state.needsRevision,
+      sortValue: state.sortValue,
+      viewMode: state.viewMode,
+      setPage: state.setPage,
+    })),
+  );
 
-  const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch] = useDebouncedValue(searchInput, 500);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [needsRevision, setNeedsRevision] = useState(false);
-  const [sortValue, setSortValue] = useState<string>('newest');
-
   const { sortColumn, sortDirection } = SORT_MAP[sortValue] ?? {};
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      'ads',
-      page,
-      debouncedSearch,
-      selectedCategories,
-      needsRevision,
-      sortColumn,
-      sortDirection,
-    ],
-    queryFn: () =>
+  const { data, isLoading, isError, isFetching } = useQuery({
+    queryKey: ['ads', page, debouncedSearch, selectedCategories, needsRevision, sortColumn, sortDirection],
+    queryFn: ({ signal }) =>
       fetchAds({
         page,
         search: debouncedSearch,
@@ -79,23 +40,13 @@ export const AdsListPage = () => {
         needsRevision,
         sortColumn,
         sortDirection,
+        signal,
       }),
+    placeholderData: keepPreviousData,
   });
 
-  const handleResetFilters = () => {
-    setSearchInput('');
-    setSelectedCategories([]);
-    setNeedsRevision(false);
-    setSortValue('newest');
-    setPage(1);
-  };
-
   if (isError) {
-    return (
-      <Alert color="red" title="Ошибка!">
-        Не удалось загрузить объявления.
-      </Alert>
-    );
+    return <PageError message="Не удалось загрузить объявления." />;
   }
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0;
@@ -110,111 +61,16 @@ export const AdsListPage = () => {
           </Text>
         </Box>
 
-        <Paper bg="white" p="md" radius="md" mb="xl" shadow="sm">
-          <Grid align="center">
-            <Grid.Col span={{ base: 12, md: 8 }}>
-              <TextInput
-                placeholder="Найти объявление..."
-                rightSection={<IconSearch size={18} color="gray" />}
-                value={searchInput}
-                onChange={(e) => {
-                  setSearchInput(e.currentTarget.value);
-                  setPage(1);
-                }}
-                size="md"
-                radius="md"
-                variant="filled"
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 4 }}>
-              <Select
-                data={SORT_OPTIONS}
-                value={sortValue}
-                onChange={(val) => {
-                  if (val) setSortValue(val);
-                  setPage(1);
-                }}
-                size="md"
-                radius="md"
-                variant="filled"
-              />
-            </Grid.Col>
-          </Grid>
-        </Paper>
+        <AdsSearchToolbar />
 
         <Grid gutter="xl">
           <Grid.Col span={{ base: 12, md: 3, lg: 2.5 }}>
-            <Card shadow="sm" radius="md" p="md" mb="md">
-              <Text fw={700} size="lg" mb="md">
-                Фильтры
-              </Text>
-
-              <Accordion
-                defaultValue="category"
-                variant="transparent"
-                styles={{
-                  item: { borderBottom: 'none' },
-                  control: { padding: 0, '&:hover': { backgroundColor: 'transparent' } },
-                  label: { padding: 0 },
-                  content: { padding: '8px 0 0 0' },
-                }}
-              >
-                <Accordion.Item value="category">
-                  <Accordion.Control>
-                    <Text fw={500} size="sm">
-                      Категория
-                    </Text>
-                  </Accordion.Control>
-                  <Accordion.Panel>
-                    <Checkbox.Group
-                      value={selectedCategories}
-                      onChange={(val) => {
-                        setSelectedCategories(val);
-                        setPage(1);
-                      }}
-                    >
-                      <Stack gap="sm">
-                        <Checkbox value="auto" label="Авто" size="sm" />
-                        <Checkbox value="electronics" label="Электроника" size="sm" />
-                        <Checkbox value="real_estate" label="Недвижимость" size="sm" />
-                      </Stack>
-                    </Checkbox.Group>
-                  </Accordion.Panel>
-                </Accordion.Item>
-              </Accordion>
-
-              <Divider my="md" />
-
-              <Group justify="space-between" wrap="nowrap" py="xs">
-                <Text fw={500} size="sm">
-                  Только требующие
-                  <br />
-                  доработок
-                </Text>
-                <Switch
-                  checked={needsRevision}
-                  onChange={(e) => {
-                    setNeedsRevision(e.currentTarget.checked);
-                    setPage(1);
-                  }}
-                  color="blue"
-                  size="md"
-                />
-              </Group>
-            </Card>
-
-            <Card shadow="sm" radius="md" p={0}>
-              <Button variant="transparent" color="gray" fullWidth onClick={handleResetFilters}>
-                Сбросить фильтры
-              </Button>
-            </Card>
+            <AdsSidebar />
           </Grid.Col>
 
           <Grid.Col span={{ base: 12, md: 9, lg: 9.5 }}>
             {isLoading ? (
-              <Center h={300}>
-                <Loader size="xl" />
-              </Center>
+              <PageLoader h={300} />
             ) : data?.items.length === 0 ? (
               <Center h={300}>
                 <Text c="dimmed" size="lg">
@@ -222,78 +78,21 @@ export const AdsListPage = () => {
                 </Text>
               </Center>
             ) : (
-              <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing="md">
-                {data?.items.map((ad) => (
-                  <Card
-                    key={ad.id}
-                    shadow="sm"
-                    padding="md"
-                    radius="md"
-                    component="a"
-                    href={`/ads/${ad.id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigate(`/ads/${ad.id}`);
-                    }}
-                    style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
-                  >
-                    <Card.Section>
-                      <Box bg="#F3F4F6">
-                        <Image
-                          src="https://placehold.co/600x400/F3F4F6/adb5bd?text=Image"
-                          height={140}
-                          alt="Placeholder"
-                          fit="contain"
-                        />
-                      </Box>
-                    </Card.Section>
-
-                    <Box style={{ marginTop: '-12px', position: 'relative', zIndex: 2 }} mb="sm">
-                      <Badge
-                        variant="outline"
-                        radius="sm"
-                        bg="white"
-                        style={{
-                          borderColor: '#E5E7EB',
-                          color: '#4B5563',
-                          textTransform: 'none',
-                          fontWeight: 500,
-                        }}
-                      >
-                        {categoryLabels[ad.category]}
-                      </Badge>
-                    </Box>
-
-                    <Text fw={500} size="sm" lineClamp={2} mb="xs" style={{ minHeight: '40px' }}>
-                      {ad.title}
-                    </Text>
-
-                    <Text fw={700} size="md" mb="md">
-                      {formatPrice(ad.price)} ₽
-                    </Text>
-
-                    {ad.needsRevision && (
-                      <Group gap={6} mt="auto">
-                        <Badge
-                          color="yellow"
-                          variant="light"
-                          size="sm"
-                          radius="sm"
-                          styles={{
-                            root: { padding: '0 8px' },
-                            label: { textTransform: 'none', fontWeight: 500, color: '#E67700' },
-                          }}
-                          leftSection={
-                            <Box w={6} h={6} bg="#FCC419" style={{ borderRadius: '50%' }} />
-                          }
-                        >
-                          Требует доработок
-                        </Badge>
-                      </Group>
-                    )}
-                  </Card>
-                ))}
-              </SimpleGrid>
+              <Box style={{ opacity: isFetching ? 0.5 : 1, transition: 'opacity 0.2s ease' }}>
+                {viewMode === 'grid' ? (
+                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4, xl: 5 }} spacing="md">
+                    {data?.items.map((ad) => (
+                      <AdGridCard key={ad.id} ad={ad} />
+                    ))}
+                  </SimpleGrid>
+                ) : (
+                  <Stack gap="sm">
+                    {data?.items.map((ad) => (
+                      <AdListCard key={ad.id} ad={ad} />
+                    ))}
+                  </Stack>
+                )}
+              </Box>
             )}
 
             {!isLoading && totalPages > 1 && (

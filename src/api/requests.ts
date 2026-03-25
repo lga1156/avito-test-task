@@ -1,7 +1,6 @@
-// src/api/requests.ts
 import { api } from './axios';
 import type { AdsListResponse, Ad, ItemUpdateIn } from '../types';
-const PAGE_SIZE = 10;
+import { PAGE_SIZE } from '../constants/adsListOptions';
 
 interface FetchAdsParams {
   page: number;
@@ -10,6 +9,7 @@ interface FetchAdsParams {
   needsRevision?: boolean;
   sortColumn?: string;
   sortDirection?: string;
+  signal?: AbortSignal;
 }
 
 export const fetchAds = async ({
@@ -19,16 +19,18 @@ export const fetchAds = async ({
   needsRevision,
   sortColumn,
   sortDirection,
+  signal,
 }: FetchAdsParams): Promise<AdsListResponse> => {
   const skip = (page - 1) * PAGE_SIZE;
 
   const response = await api.get('/items', {
+    signal,
     params: {
-      PAGE_SIZE,
+      limit: PAGE_SIZE,
       skip,
       ...(search ? { q: search } : {}),
 
-      ...(categories && categories.length > 0 ? { categories } : {}),
+      ...(categories && categories.length > 0 ? { categories: categories.join(',') } : {}),
 
       ...(needsRevision ? { needsRevision: true } : {}),
       ...(sortColumn ? { sortColumn } : {}),
@@ -39,12 +41,11 @@ export const fetchAds = async ({
   return response.data;
 };
 
-export const fetchAdById = async (id: string): Promise<Ad> => {
-  const response = await api.get(`/items/${id}`);
+export const fetchAdById = async (id: string, signal?: AbortSignal): Promise<Ad> => {
+  const response = await api.get(`/items/${id}`, { signal });
   return response.data;
 };
 
 export const updateAd = async (id: string, data: ItemUpdateIn): Promise<void> => {
-  // Promise<Ad>?
   await api.put(`/items/${id}`, data);
 };
