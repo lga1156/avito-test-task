@@ -196,3 +196,7 @@ docker-compose up --build -d
 - Возможность запустить через `Docker`
 - Для корректной работы с Backend внес некоторые изменения в файлы директории `/server` (правки пометил комментариями)
 - Использован Zustand для легковесного хранения локального UI-состояния (сетка/список) и параметров поиска.
+- Темная тема (слайдер и сохранение выбора в `localStorage`)
+
+<img width="1470" height="956" alt="ads-list-dark" src="https://github.com/user-attachments/assets/ceb7f9f3-79d1-4aa9-a6a1-0a671f8053a8" />
+
