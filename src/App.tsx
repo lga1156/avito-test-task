@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppShell, Group } from '@mantine/core';
+import { ThemeToggle } from './components/ui/ThemeToggle';
 import { PageLoader } from './components/ui/PageLoader';
 
 // Ленивая загрузка страниц для разделения бандлов (Code Splitting)
@@ -11,19 +13,24 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((module) => 
 function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/ads" replace />} />
-
-          <Route path="/ads" element={<AdsListPage />} />
-
-          <Route path="/ads/:id" element={<AdDetailsPage />} />
-
-          <Route path="/ads/:id/edit" element={<AdEditPage />} />
-
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
+      <AppShell header={{ height: 60 }} padding="md">
+        <AppShell.Header withBorder={false}>
+          <Group h="100%" px="md" justify="flex-end">
+            <ThemeToggle />
+          </Group>
+        </AppShell.Header>
+        <AppShell.Main>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/ads" replace />} />
+              <Route path="/ads" element={<AdsListPage />} />
+              <Route path="/ads/:id" element={<AdDetailsPage />} />
+              <Route path="/ads/:id/edit" element={<AdEditPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </AppShell.Main>
+      </AppShell>
     </BrowserRouter>
   );
 }

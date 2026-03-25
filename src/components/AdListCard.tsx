@@ -22,7 +22,6 @@ export const AdListCard = ({ ad }: AdListCardProps) => {
     >
       <Group gap="md" align="center" wrap="nowrap">
         <Box
-          bg="#F3F4F6"
           w={80}
           h={80}
           style={{
@@ -31,9 +30,10 @@ export const AdListCard = ({ ad }: AdListCardProps) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            border: '1px solid var(--mantine-color-default-border)',
           }}
         >
-          <IconPhoto size={40} color="#ADB5BD" stroke={1.5} />
+          <IconPhoto size={40} color="var(--mantine-color-dimmed)" stroke={1.5} />
         </Box>
 
         <Box style={{ flex: 1, minWidth: 0 }}>
@@ -55,9 +55,8 @@ export const AdListCard = ({ ad }: AdListCardProps) => {
               mt={4}
               styles={{
                 root: { padding: '0 8px' },
-                label: { textTransform: 'none', fontWeight: 500, color: '#E67700' },
+                label: { textTransform: 'none', fontWeight: 500 },
               }}
-              leftSection={<Box w={6} h={6} bg="#FCC419" style={{ borderRadius: '50%' }} />}
             >
               Требует доработок
             </Badge>

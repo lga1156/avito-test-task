@@ -22,26 +22,23 @@ export const AdGridCard = ({ ad }: AdGridCardProps) => {
     >
       <Card.Section>
         <Box
-          bg="#F3F4F6"
           h={140}
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            borderBottom: '1px solid var(--mantine-color-default-border)',
           }}
         >
-          <IconPhoto size={60} color="#ADB5BD" stroke={1.5} />
+          <IconPhoto size={60} color="var(--mantine-color-dimmed)" stroke={1.5} />
         </Box>
       </Card.Section>
 
       <Box style={{ marginTop: '-12px', position: 'relative', zIndex: 2 }} mb="sm">
         <Badge
-          variant="outline"
+          variant="default"
           radius="sm"
-          bg="white"
           style={{
-            borderColor: '#E5E7EB',
-            color: '#4B5563',
             textTransform: 'none',
             fontWeight: 500,
           }}
@@ -67,9 +64,8 @@ export const AdGridCard = ({ ad }: AdGridCardProps) => {
             radius="sm"
             styles={{
               root: { padding: '0 8px' },
-              label: { textTransform: 'none', fontWeight: 500, color: '#E67700' },
+              label: { textTransform: 'none', fontWeight: 500 },
             }}
-            leftSection={<Box w={6} h={6} bg="#FCC419" style={{ borderRadius: '50%' }} />}
           >
             Требует доработок
           </Badge>

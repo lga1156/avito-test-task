@@ -17,7 +17,7 @@ export const AdsSearchToolbar = () => {
   );
 
   return (
-    <Paper bg="white" p="md" radius="md" mb="xl" shadow="sm">
+    <Paper p="md" radius="md" mb="xl" shadow="sm" withBorder>
       <Grid align="center">
         <Grid.Col span={{ base: 12, md: 8 }}>
           <TextInput

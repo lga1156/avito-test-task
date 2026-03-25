@@ -43,7 +43,7 @@ export const AdDetailsPage = () => {
       <Grid gutter={50}>
         <Grid.Col span={{ base: 12, md: 7 }}>
           <Paper
-            bg="gray.1"
+            withBorder
             h={400}
             radius="md"
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}

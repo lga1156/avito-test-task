@@ -11,7 +11,7 @@ const getModel = () => {
   if (!genAI) {
     throw new Error('ОШИБКА: VITE_GEMINI_API_KEY не найден в файле .env. ИИ-функции недоступны.');
   }
-  return genAI.getGenerativeModel({ model: 'gemini-flash-lite-latest' }); // выбрал более дешевую в стоимости запросов
+  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' }); // выбрал более дешевую в стоимости запросов
 };
 
 export const generateDescription = async (adData: {

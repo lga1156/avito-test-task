@@ -10,8 +10,12 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Не показываем уведомления для специфичных запросов (например генерация AI),
-    // если хотим обрабатывать их локально. Но для базовых круто иметь глобалку.
+    // В React Query при переходе между страницами запросы прерываются (AbortController).
+    // Мы не должны показывать пользователю красное уведомление об отмене запроса.
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     const message = error.response?.data?.message || error.message || 'Произошла неизвестная ошибка';
 
     notifications.show({

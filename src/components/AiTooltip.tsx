@@ -21,10 +21,10 @@ export const AiTooltip = ({ state, onApply, onClose }: AiTooltipProps) => {
       mt="xs"
       p="md"
       style={{
-        background: '#fff',
-        border: '1px solid #E5E7EB',
+        background: 'var(--mantine-color-body)',
+        border: '1px solid var(--mantine-color-default-border)',
         borderRadius: 8,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+        boxShadow: 'var(--mantine-shadow-sm)',
       }}
     >
       {state.status === 'error' && (
@@ -43,10 +43,10 @@ export const AiTooltip = ({ state, onApply, onClose }: AiTooltipProps) => {
 
       {state.status === 'success' && (
         <Stack gap="sm">
-          <Text size="sm" fw={600}>
+          <Text size="sm" fw={600} c="dimmed">
             Ответ AI:
           </Text>
-          <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+          <Text size="sm" style={{ whiteSpace: 'pre-wrap', color: 'var(--mantine-color-text)' }}>
             {state.result}
           </Text>
           <Group gap="xs">

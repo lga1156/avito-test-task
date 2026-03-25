@@ -52,7 +52,7 @@ export const AdsListPage = () => {
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0;
 
   return (
-    <Box bg="#F8F9FA" mih="100vh" py="xl">
+    <Box mih="100vh">
       <Container size={1400}>
         <Box mb="xl">
           <Title order={2}>Мои объявления</Title>
