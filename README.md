@@ -168,7 +168,7 @@ cd avito-test-task
 cp .env.example .env
 ```
 
-Далее откройте созданный файл `.env` и вставьте ваш персональный API-ключ из [Gemini Api Keys](https://aistudio.google.com/api-keys):
+Далее откройте созданный файл `.env` и вставьте ваш персональный API-ключ из [Gemini API keys](https://aistudio.google.com/api-keys):
 
 ```
 VITE_GEMINI_API_KEY=Тут_ваш_ключ...
